@@ -40,7 +40,9 @@ public class ExcelAutoConfiguration {
     @Bean(name = "excelExportHandler")
     @ConditionalOnMissingBean(ExcelExportHandler.class)
     public ExcelExportHandler excelExportHandler(){
-        return new ExcelExportHandler();
+        ExcelExportHandler excelExportHandler = new ExcelExportHandler();
+        excelExportHandler.setExcelDir(excelProperties.getExportDir());
+        return excelExportHandler;
     }
 
 }

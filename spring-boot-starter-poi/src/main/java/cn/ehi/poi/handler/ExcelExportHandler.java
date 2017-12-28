@@ -19,6 +19,8 @@ import java.util.*;
 
 public class ExcelExportHandler {
 
+    private String excelDir;
+
     public void exportExcel(Object exportObj) throws IOException {
 
         Class<?> exportObjClass = exportObj.getClass();
@@ -37,13 +39,13 @@ public class ExcelExportHandler {
                 if (!Modifier.isStatic(sheetListField.getModifiers()) && sheetListField.getAnnotation(ExcelSheet.class) != null) {
                     ExcelSheet excelSheetAnnotation = sheetListField.getAnnotation(ExcelSheet.class);
                     String filedName = sheetListField.getName();
-                    filedName = filedName.substring(0,1).toUpperCase() + filedName.substring(1);
+                    filedName = filedName.substring(0, 1).toUpperCase() + filedName.substring(1);
                     Method sheetListGetter;
                     try {
-                        sheetListGetter = exportObjClass.getDeclaredMethod("get"+filedName);
-                        List sheetList= (List) sheetListGetter.invoke(exportObj);
-                        makeSheet(workbook,sheetList,excelSheetAnnotation.name());
-                        FileOutputStream fos = new FileOutputStream(fileName);
+                        sheetListGetter = exportObjClass.getDeclaredMethod("get" + filedName);
+                        List sheetList = (List) sheetListGetter.invoke(exportObj);
+                        makeSheet(workbook, sheetList, excelSheetAnnotation.name());
+                        FileOutputStream fos = new FileOutputStream(getExcelDir() + "/" + fileName);
                         workbook.write(fos);
                         fos.close();
                     } catch (NoSuchMethodException e) {
@@ -59,18 +61,18 @@ public class ExcelExportHandler {
 
     }
 
-    private static void makeSheet(Workbook workbook,List<?> sheetList,String sname){
-        if(sheetList.isEmpty()){
+    private static void makeSheet(Workbook workbook, List<?> sheetList, String sname) {
+        if (sheetList.isEmpty()) {
             throw new RuntimeException("SheetList is empty");
         }
         Class<?> sheetDataClass = sheetList.get(0).getClass();
 //        ExcelSheet excelSheetAnnotation = (ExcelSheet) sheetDataClass.getAnnotation(ExcelSheet.class);
 //        String sheetName = Optional.of(sname).orElse(sheetDataClass.getSimpleName());
-        Map<String,ExcelField> excelFieldMap = new HashMap<>();
-        for(Field sheetDataField : sheetDataClass.getDeclaredFields()){
+        Map<String, ExcelField> excelFieldMap = new HashMap<>();
+        for (Field sheetDataField : sheetDataClass.getDeclaredFields()) {
             ExcelField excelFieldAnnotation = sheetDataField.getAnnotation(ExcelField.class);
-            if(excelFieldAnnotation != null){
-                excelFieldMap.put(sheetDataField.getName(),excelFieldAnnotation);
+            if (excelFieldAnnotation != null) {
+                excelFieldMap.put(sheetDataField.getName(), excelFieldAnnotation);
             }
         }
         Sheet sheet;
@@ -78,20 +80,19 @@ public class ExcelExportHandler {
 
         Row headRow = sheet.createRow(0);
         int colIndex = 0;
-        for(String sheetHeader : excelFieldMap.keySet()){
+        for (String sheetHeader : excelFieldMap.keySet()) {
             Cell cell = headRow.createCell(colIndex++);
             cell.setCellValue(excelFieldMap.get(sheetHeader).name());
         }
 
         int rowCount = sheetList.size();
         for (int i = 0; i < rowCount; i++) {
-            Row row = sheet.createRow(i+1);
+            Row row = sheet.createRow(i + 1);
+            colIndex = 0;
             for (String sheetHeader : excelFieldMap.keySet()) {
                 try {
-                    sheetHeader = sheetHeader.substring(0,1).toUpperCase() + sheetHeader.substring(1);
-                    Method dataGetter = sheetDataClass.getDeclaredMethod("get"+sheetHeader);
-                    System.out.println(dataGetter.getName());
-                    System.out.println(sheetList.get(i));
+                    sheetHeader = sheetHeader.substring(0, 1).toUpperCase() + sheetHeader.substring(1);
+                    Method dataGetter = sheetDataClass.getDeclaredMethod("get" + sheetHeader);
                     Object data = dataGetter.invoke(sheetList.get(i));
                     Cell cell = row.createCell(colIndex++);
                     cell.setCellValue(String.valueOf(data));
@@ -103,11 +104,18 @@ public class ExcelExportHandler {
                     throw new RuntimeException("ExcelFiledGetter invocation error.");
                 }
             }
-            colIndex = 0;
+//            colIndex = 0;
         }
 //        excelFieldMap.forEach((k,v)->System.out.println(k+"-->"+v));
 
     }
 
 
+    private String getExcelDir() {
+        return excelDir;
+    }
+
+    public void setExcelDir(String excelDir) {
+        this.excelDir = excelDir;
+    }
 }

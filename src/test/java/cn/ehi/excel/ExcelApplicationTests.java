@@ -28,6 +28,10 @@ public class ExcelApplicationTests {
 		clazz1.setAge(10);
 		clazz1.setName("hehe");
 		clazzes.add(clazz1);
+		Clazz clazz2 = new Clazz();
+		clazz2.setAge(100);
+		clazz2.setName("haa");
+		clazzes.add(clazz2);
 		grade.setClazzes(clazzes);
 
 		excelExportHandler.exportExcel(grade);
