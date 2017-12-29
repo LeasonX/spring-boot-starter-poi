@@ -85,7 +85,8 @@ public class ExcelExportHandler {
         int colIndex = 0;
         for (String sheetHeader : excelFieldMap.keySet()) {
             Cell cell = headRow.createCell(colIndex++);
-            cell.setCellValue(excelFieldMap.get(sheetHeader).name());
+            String headerName = excelFieldMap.get(sheetHeader).name();
+            cell.setCellValue(headerName.isEmpty() ? sheetHeader : headerName);
         }
 
         int rowCount = sheetList.size();

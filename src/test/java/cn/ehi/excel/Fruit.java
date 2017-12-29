@@ -10,6 +10,7 @@ public class Fruit {
     @ExcelField(name = "价格")
     private double price;
 
+    @ExcelField
     private String cityFrom;
 
     public String getName() {
