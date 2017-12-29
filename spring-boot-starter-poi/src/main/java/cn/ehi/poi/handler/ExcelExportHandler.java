@@ -38,14 +38,14 @@ public class ExcelExportHandler {
         if (exportObjClass.getDeclaredFields() != null && exportObjClass.getDeclaredFields().length > 0) {
             for (Field sheetListField : exportObjClass.getDeclaredFields()) {
                 if (!Modifier.isStatic(sheetListField.getModifiers()) && sheetListField.getAnnotation(ExcelSheet.class) != null) {
-                    ExcelSheet excelSheetAnnotation = sheetListField.getAnnotation(ExcelSheet.class);
+//                    ExcelSheet excelSheetAnnotation = sheetListField.getAnnotation(ExcelSheet.class);
                     String filedName = sheetListField.getName();
                     filedName = filedName.substring(0, 1).toUpperCase() + filedName.substring(1);
                     Method sheetListGetter;
                     try {
-                        sheetListGetter = exportObjClass.getDeclaredMethod("get"+filedName);
-                        List sheetList= (List) sheetListGetter.invoke(exportObj);
-                        makeSheet(workbook,sheetList,excelSheetAnnotation.name());
+                        sheetListGetter = exportObjClass.getDeclaredMethod("get" + filedName);
+                        List sheetList = (List) sheetListGetter.invoke(exportObj);
+                        makeSheet(workbook, sheetList);
 
                     } catch (NoSuchMethodException e) {
                         throw new RuntimeException("SheetListGetter is not exist.");
@@ -57,14 +57,14 @@ public class ExcelExportHandler {
                 }
             }
             //File write
-            FileOutputStream fos = new FileOutputStream(fileName);
+            FileOutputStream fos = new FileOutputStream(getExcelDir() + "/" + fileName);
             workbook.write(fos);
             fos.close();
         }
 
     }
 
-    private static void makeSheet(Workbook workbook, List<?> sheetList, String sname) {
+    private static void makeSheet(Workbook workbook, List<?> sheetList) {
         if (sheetList.isEmpty()) {
             throw new RuntimeException("SheetList is empty");
         }
@@ -107,6 +107,7 @@ public class ExcelExportHandler {
                     throw new RuntimeException("ExcelFiledGetter invocation error.");
                 }
             }
+        }
     }
 
 
