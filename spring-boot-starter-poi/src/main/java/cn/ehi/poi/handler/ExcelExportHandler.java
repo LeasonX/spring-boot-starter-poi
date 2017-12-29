@@ -20,6 +20,8 @@ import java.util.*;
 
 public class ExcelExportHandler {
 
+    private String excelDir;
+
     public void exportExcel(@NotNull Object exportObj) throws IOException {
 
         Class<?> exportObjClass = exportObj.getClass();
@@ -38,7 +40,7 @@ public class ExcelExportHandler {
                 if (!Modifier.isStatic(sheetListField.getModifiers()) && sheetListField.getAnnotation(ExcelSheet.class) != null) {
                     ExcelSheet excelSheetAnnotation = sheetListField.getAnnotation(ExcelSheet.class);
                     String filedName = sheetListField.getName();
-                    filedName = filedName.substring(0,1).toUpperCase() + filedName.substring(1);
+                    filedName = filedName.substring(0, 1).toUpperCase() + filedName.substring(1);
                     Method sheetListGetter;
                     try {
                         sheetListGetter = exportObjClass.getDeclaredMethod("get"+filedName);
@@ -62,18 +64,18 @@ public class ExcelExportHandler {
 
     }
 
-    private static void makeSheet(Workbook workbook,List<?> sheetList,String sname){
-        if(sheetList.isEmpty()){
+    private static void makeSheet(Workbook workbook, List<?> sheetList, String sname) {
+        if (sheetList.isEmpty()) {
             throw new RuntimeException("SheetList is empty");
         }
         Class<?> sheetDataClass = sheetList.get(0).getClass();
 //        ExcelSheet excelSheetAnnotation = (ExcelSheet) sheetDataClass.getAnnotation(ExcelSheet.class);
 //        String sheetName = Optional.of(sname).orElse(sheetDataClass.getSimpleName());
-        Map<String,ExcelField> excelFieldMap = new HashMap<>();
-        for(Field sheetDataField : sheetDataClass.getDeclaredFields()){
+        Map<String, ExcelField> excelFieldMap = new HashMap<>();
+        for (Field sheetDataField : sheetDataClass.getDeclaredFields()) {
             ExcelField excelFieldAnnotation = sheetDataField.getAnnotation(ExcelField.class);
-            if(excelFieldAnnotation != null){
-                excelFieldMap.put(sheetDataField.getName(),excelFieldAnnotation);
+            if (excelFieldAnnotation != null) {
+                excelFieldMap.put(sheetDataField.getName(), excelFieldAnnotation);
             }
         }
         Sheet sheet;
@@ -81,7 +83,7 @@ public class ExcelExportHandler {
 
         Row headRow = sheet.createRow(0);
         int colIndex = 0;
-        for(String sheetHeader : excelFieldMap.keySet()){
+        for (String sheetHeader : excelFieldMap.keySet()) {
             Cell cell = headRow.createCell(colIndex++);
             cell.setCellValue(excelFieldMap.get(sheetHeader).name());
         }
@@ -89,7 +91,7 @@ public class ExcelExportHandler {
         int rowCount = sheetList.size();
         for (int i = 0; i < rowCount; i++) {
             colIndex = 0;
-            Row row = sheet.createRow(i+1);
+            Row row = sheet.createRow(i + 1);
             for (String sheetHeader : excelFieldMap.keySet()) {
                 try {
                     sheetHeader = sheetHeader.substring(0, 1).toUpperCase() + sheetHeader.substring(1);
@@ -105,8 +107,14 @@ public class ExcelExportHandler {
                     throw new RuntimeException("ExcelFiledGetter invocation error.");
                 }
             }
-        }
     }
 
 
+    private String getExcelDir() {
+        return excelDir;
+    }
+
+    public void setExcelDir(String excelDir) {
+        this.excelDir = excelDir;
+    }
 }
