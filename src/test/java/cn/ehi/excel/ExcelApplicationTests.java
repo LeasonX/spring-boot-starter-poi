@@ -21,16 +21,29 @@ public class ExcelApplicationTests {
 	@Test
 	public void contextLoads() throws IOException {
 
-		Grade grade = new Grade();
+		Food food = new Food();
 
-		List<Clazz> clazzes = new ArrayList<>();
-		Clazz clazz1 = new Clazz();
-		clazz1.setAge(10);
-		clazz1.setName("hehe");
-		clazzes.add(clazz1);
-		grade.setClazzes(clazzes);
+		List<Fruit> fruits = new ArrayList<>();
+		for(int i =0;i<10000;i++){
+			Fruit fruit = new Fruit();
+			fruit.setName("水果"+i);
+			fruit.setPrice(i*1.1);
+			fruit.setCityFrom("上海");
+			fruits.add(fruit);
+		}
 
-		excelExportHandler.exportExcel(grade);
+		List<Vegetable> vegetables = new ArrayList<>();
+		for(int i =0;i<6000;i++){
+			Vegetable vegetable = new Vegetable();
+			vegetable.setName("蔬菜"+i);
+			vegetable.setPrice(i*1.1);
+			vegetables.add(vegetable);
+		}
+
+		food.setFruits(fruits);
+		food.setVegetables(vegetables);
+
+		excelExportHandler.exportExcel(food);
 	}
 
 }
