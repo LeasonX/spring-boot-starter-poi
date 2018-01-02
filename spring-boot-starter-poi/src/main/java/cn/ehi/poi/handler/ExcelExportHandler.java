@@ -27,13 +27,12 @@ public class ExcelExportHandler {
         Class<?> exportObjClass = exportObj.getClass();
         ExcelFile excelFileAnnotation = exportObjClass.getAnnotation(ExcelFile.class);
         if (excelFileAnnotation == null) {
-            throw new RuntimeException("Export object must have [ExcelFile] annotation.");
+            throw new RuntimeException("导出对象类型必须存在@ExcelFile注解.");
         }
 
         Workbook workbook = new SXSSFWorkbook(500);
 
         String fileName = Optional.of(excelFileAnnotation.fileName()).orElse(exportObjClass.getSimpleName());
-//        System.out.println(fileName);
 
         if (exportObjClass.getDeclaredFields() != null && exportObjClass.getDeclaredFields().length > 0) {
             for (Field sheetListField : exportObjClass.getDeclaredFields()) {
@@ -45,18 +44,22 @@ public class ExcelExportHandler {
                     try {
                         sheetListGetter = exportObjClass.getDeclaredMethod("get" + filedName);
                         List sheetList = (List) sheetListGetter.invoke(exportObj);
+                        if (sheetList.isEmpty()) {
+                            throw new RuntimeException("@ExcelSheet注解参数["+filedName+"]数据为空.");
+                        }
                         makeSheet(workbook, sheetList);
-
                     } catch (NoSuchMethodException e) {
-                        throw new RuntimeException("SheetListGetter is not exist.");
+                        throw new RuntimeException("@ExcelSheet注解参数["+filedName+"]无getter方法.");
                     } catch (IllegalAccessException e) {
-                        throw new RuntimeException("SheetListGetter invoke is illegalAccess.");
+                        throw new RuntimeException("@ExcelSheet注解参数["+filedName+"]getter方法无权限访问.");
                     } catch (InvocationTargetException e) {
-                        throw new RuntimeException("SheetListGetter invocation error.");
+                        throw new RuntimeException("@ExcelSheet注解参数["+filedName+"]getter方法调用失败.");
+                    }catch (ClassCastException e){
+                        throw new RuntimeException("@ExcelSheet注解参数["+filedName+"]数据类型必须为java.util.List类型.");
                     }
                 }
             }
-            //File write
+            //file write
             FileOutputStream fos = new FileOutputStream(getExcelDir() + "/" + fileName);
             workbook.write(fos);
             fos.close();
@@ -65,9 +68,6 @@ public class ExcelExportHandler {
     }
 
     private static void makeSheet(Workbook workbook, List<?> sheetList) {
-        if (sheetList.isEmpty()) {
-            throw new RuntimeException("SheetList is empty");
-        }
         Class<?> sheetDataClass = sheetList.get(0).getClass();
 //        ExcelSheet excelSheetAnnotation = (ExcelSheet) sheetDataClass.getAnnotation(ExcelSheet.class);
 //        String sheetName = Optional.of(sname).orElse(sheetDataClass.getSimpleName());
@@ -101,11 +101,11 @@ public class ExcelExportHandler {
                     Cell cell = row.createCell(colIndex++);
                     cell.setCellValue(String.valueOf(data));
                 } catch (NoSuchMethodException e) {
-                    throw new RuntimeException("ExcelFiledGetter is not exist.");
+                    throw new RuntimeException("@ExcelFiled注解参数["+ sheetHeader +"]无getter方法.");
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException("ExcelFiledGetter invoke is illegalAccess.");
+                    throw new RuntimeException("@ExcelFiled注解参数["+ sheetHeader +"]getter方法无访问权限.");
                 } catch (InvocationTargetException e) {
-                    throw new RuntimeException("ExcelFiledGetter invocation error.");
+                    throw new RuntimeException("@ExcelFiled注解参数["+ sheetHeader +"]getter方法调用失败.");
                 }
             }
         }
