@@ -1,0 +1,6 @@
+foo:
+  users:
+    - name: test
+      age: 10
+    - name: 测试
+      age: 12

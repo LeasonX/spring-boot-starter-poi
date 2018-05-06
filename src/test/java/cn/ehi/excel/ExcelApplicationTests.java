@@ -1,5 +1,6 @@
 package cn.ehi.excel;
 
+import cn.ehi.excel.config.Foo;
 import cn.ehi.poi.handler.ExcelExportHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,14 @@ public class ExcelApplicationTests {
 		food.setVegetables(vegetables);
 
 		excelExportHandler.exportExcel(food);
+	}
+
+	@Autowired
+	private Foo foo;
+
+	@Test
+	public void testProperties(){
+		foo.getUsers().forEach(System.out::println);
 	}
 
 }
